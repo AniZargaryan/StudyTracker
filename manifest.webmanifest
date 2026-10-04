@@ -1,0 +1,11 @@
+{
+  "name":"Study Tracker",
+  "short_name":"Study",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#f6f7fb",
+  "theme_color":"#0f172a",
+  "description":"Учебный таймер с облачной синхронизацией.",
+  "icons":[{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}
