@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Study Tracker</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#667085;--line:#e5e7eb;--blue:#2563eb;--blue2:#1d4ed8;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}.wrap{max-width:1000px;margin:auto;padding:18px 14px 40px}.hidden{display:none!important}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 28px rgba(15,23,42,.06)}.panel{padding:18px;margin-top:14px}.top,.row,.actions,.sectionHead{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.top,.sectionHead{justify-content:space-between}h1{margin:0;font-size:26px}.sub,.small{color:var(--muted);font-size:13px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.card{padding:14px}.label{font-size:12px;color:var(--muted);margin-bottom:5px}.value{font-size:22px;font-weight:800}.grow{flex:1;min-width:210px}input,select{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}.btn{border:0;border-radius:12px;padding:11px 14px;min-height:44px;font-weight:700;cursor:pointer;background:#eef2ff;color:#1e3a8a}.btn.primary{background:var(--blue);color:#fff}.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}.btn.danger{background:#fff1f2;color:var(--red)}.btn:disabled{opacity:.45;cursor:not-allowed}.auth{max-width:480px;margin:42px auto}.tabs{display:flex;gap:8px;margin:14px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px}.tab.active{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}.authGrid{display:grid;gap:10px}.timer{font-size:52px;font-weight:800;text-align:center;margin:22px 0 4px;font-variant-numeric:tabular-nums}.status{text-align:center;color:var(--muted);min-height:22px}.actions{justify-content:center;margin-top:14px}.notice{min-height:20px;margin-top:10px;color:var(--muted);font-size:13px}.pill{font-size:12px;font-weight:700;color:#027a48;background:#ecfdf3;padding:7px 10px;border-radius:999px}.heatWrap{overflow-x:auto;padding-bottom:4px}.heatmap{display:grid;grid-template-rows:repeat(7,12px);grid-auto-flow:column;grid-auto-columns:12px;gap:3px;min-width:max-content}.sq{width:12px;height:12px;border-radius:3px;background:#edf0f4}.l1{background:#dbeafe}.l2{background:#93c5fd}.l3{background:#3b82f6}.l4{background:#1d4ed8}.stats{display:grid;gap:10px}.stat{display:grid;grid-template-columns:minmax(120px,1fr) 2fr auto;gap:10px;align-items:center}.bar{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden}.bar>div{height:100%;background:var(--blue)}.history{display:grid}.hist{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.manual{display:grid;grid-template-columns:1.2fr .8fr .7fr auto;gap:10px}.legend{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px}
+@media(max-width:720px){.cards{grid-template-columns:repeat(2,1fr)}.timer{font-size:42px}.manual{grid-template-columns:1fr 1fr}.manual .wide{grid-column:1/-1}.stat{grid-template-columns:1fr auto}.stat .bar{grid-column:1/-1}}
+@media(max-width:430px){.wrap{padding:12px}.timer{font-size:36px}.manual{grid-template-columns:1fr}.manual .wide{grid-column:auto}.hist{grid-template-columns:1fr auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="authView" class="auth panel">
+  <h1>Study Tracker</h1>
+  <div class="sub">Прогресс хранится в облаке и синхронизируется между устройствами.</div>
+  <div class="tabs">
+    <button type="button" class="tab active" data-mode="signin">Вход</button>
+    <button type="button" class="tab" data-mode="signup">Регистрация</button>
+  </div>
+  <div class="authGrid">
+    <input id="email" type="email" placeholder="Email" autocomplete="email">
+    <input id="password" type="password" placeholder="Пароль — минимум 6 символов" autocomplete="current-password">
+    <button id="authBtn" class="btn primary" type="button">Войти</button>
+  </div>
+  <div id="authMsg" class="notice"></div>
+</section>
+
+<main id="appView" class="hidden">
+  <div class="top">
+    <div><h1>Study Tracker</h1><div id="accountLabel" class="sub"></div></div>
+    <div class="row"><span class="pill">● Облако подключено</span><button id="logoutBtn" class="btn ghost" type="button">Выйти</button></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="label">Сегодня</div><div class="value" id="todayTotal">0 мин</div></div>
+    <div class="card"><div class="label">Эта неделя</div><div class="value" id="weekTotal">0 мин</div></div>
+    <div class="card"><div class="label">Streak</div><div class="value" id="streak">0 дней</div></div>
+    <div class="card"><div class="label">Всего</div><div class="value" id="allTotal">0 мин</div></div>
+  </div>
+
+  <section class="panel">
+    <div class="row">
+      <label class="grow"><div class="label">Предмет</div><select id="subject"></select></label>
+      <label class="grow"><div class="label">Новый предмет</div><input id="newSubject" maxlength="80" placeholder="Например: Финансовый менеджмент"></label>
+      <button id="addSubject" class="btn ghost" type="button">Добавить</button>
+    </div>
+    <div id="timer" class="timer">00:00:00</div>
+    <div id="timerStatus" class="status">Таймер не запущен</div>
+    <div class="actions">
+      <button id="startBtn" class="btn primary" type="button">Старт</button>
+      <button id="pauseBtn" class="btn ghost" type="button" disabled>Пауза</button>
+      <button id="finishBtn" class="btn ghost" type="button" disabled>Завершить и сохранить</button>
+      <button id="discardBtn" class="btn danger" type="button" disabled>Сбросить</button>
+    </div>
+    <div id="notice" class="notice" aria-live="polite"></div>
+  </section>
+
+  <section class="panel">
+    <div class="sectionHead">
+      <div><strong>Активность за год</strong><div class="small">0–29 · 30–59 · 60–119 · 120+ минут</div></div>
+      <div class="legend"><span>меньше</span><i class="sq"></i><i class="sq l1"></i><i class="sq l2"></i><i class="sq l3"></i><i class="sq l4"></i><span>больше</span></div>
+    </div>
+    <div class="heatWrap"><div id="heatmap" class="heatmap"></div></div>
+  </section>
+
+  <section class="panel"><div class="sectionHead"><strong>По предметам</strong><span class="small">всё время</span></div><div id="subjectStats" class="stats"></div></section>
+
+  <section class="panel">
+    <div class="sectionHead"><strong>Добавить время вручную</strong></div>
+    <form id="manualForm" class="manual">
+      <select id="manualSubject" class="wide"></select>
+      <input id="manualDate" type="date">
+      <input id="manualMinutes" type="number" min="1" max="1440" step="1" placeholder="Минуты">
+      <button class="btn primary" type="submit">Добавить</button>
+    </form>
+  </section>
+
+  <section class="panel"><div class="sectionHead"><strong>История</strong><span class="small">последние 30</span></div><div id="history" class="history"></div></section>
+</main>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const supabase=createClient("https://jynugmbifimbnkpfcymb.supabase.co","sb_publishable_aX0n93MsccN5sQf3lXeUmQ_myYhrNzU",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=s=>document.querySelector(s);
+let mode="signin",user=null,subjects=[],sessions=[],active=null,tick=null;
+const pad=n=>String(n).padStart(2,"0");
+const key=(d=new Date())=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const clock=s=>{s=Math.max(0,Math.floor(s));return `${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`};
+const duration=s=>{const m=Math.round(Number(s||0)/60);if(m<60)return `${m} мин`;const h=Math.floor(m/60),r=m%60;return r?`${h} ч ${r} мин`:`${h} ч`};
+const activeSeconds=()=>{if(!active)return 0;const base=Number(active.elapsed_seconds)||0;return active.running&&active.started_at?base+Math.max(0,Math.floor((Date.now()-new Date(active.started_at))/1000)):base};
+const say=(m="")=>$("#notice").textContent=m;
+function showAuth(m=""){ $("#authView").classList.remove("hidden");$("#appView").classList.add("hidden");$("#authMsg").textContent=m }
+function showApp(){ $("#authView").classList.add("hidden");$("#appView").classList.remove("hidden");$("#accountLabel").textContent=user?.email||"" }
+
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));$("#authBtn").textContent=mode==="signin"?"Войти":"Создать аккаунт";$("#authMsg").textContent=""});
+$("#authBtn").onclick=async()=>{const email=$("#email").value.trim(),password=$("#password").value;if(!email||password.length<6){$("#authMsg").textContent="Укажи email и пароль минимум из 6 символов.";return}$("#authBtn").disabled=true;try{if(mode==="signin"){const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;user=data.user;await boot()}else{const redirectTo=location.origin+location.pathname;const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:redirectTo}});if(error)throw error;if(data.session){user=data.user;await boot()}else $("#authMsg").textContent="Проверь почту и подтверди email, затем войди.";}}catch(e){$("#authMsg").textContent=e.message||"Ошибка авторизации"}finally{$("#authBtn").disabled=false}};
+$("#logoutBtn").onclick=async()=>{await supabase.auth.signOut();user=null;subjects=[];sessions=[];active=null;showAuth("Ты вышла из аккаунта.")};
+
+async function boot(){showApp();await load();render();startTicker()}
+async function load(){const [a,b,c]=await Promise.all([supabase.from("subjects").select("*").order("sort_order").order("created_at"),supabase.from("study_sessions").select("*").order("created_at",{ascending:false}).limit(1000),supabase.from("active_timers").select("*").maybeSingle()]);if(a.error)throw a.error;if(b.error)throw b.error;if(c.error)throw c.error;subjects=a.data||[];sessions=b.data||[];active=c.data||null}
+function renderSubjects(){for(const id of ["subject","manualSubject"]){const el=$("#"+id);const old=el.value;el.innerHTML="";subjects.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name;el.appendChild(o)});if(old)el.value=old}if(active?.subject_id)$("#subject").value=active.subject_id}
+function renderTimer(){const running=!!active?.running;$("#timer").textContent=clock(activeSeconds());$("#subject").disabled=!!active;$("#pauseBtn").disabled=!running;$("#finishBtn").disabled=!active;$("#discardBtn").disabled=!active;$("#startBtn").disabled=running;$("#startBtn").textContent=active&&!running?"Продолжить":"Старт";$("#timerStatus").textContent=!active?"Таймер не запущен":running?`Идёт занятие: ${active.subject_name}`:`На паузе: ${active.subject_name}`}
+function totals(){const o={};sessions.forEach(s=>{const k=key(new Date(s.ended_at||s.created_at));o[k]=(o[k]||0)+Number(s.duration_seconds||0)});return o}
+function renderCards(){const t=totals();$("#todayTotal").textContent=duration(t[key()]||0);const n=new Date(),monday=new Date(n);monday.setHours(0,0,0,0);monday.setDate(monday.getDate()-((monday.getDay()+6)%7));const w=sessions.filter(s=>new Date(s.ended_at||s.created_at)>=monday).reduce((a,s)=>a+Number(s.duration_seconds||0),0);$("#weekTotal").textContent=duration(w);$("#allTotal").textContent=duration(sessions.reduce((a,s)=>a+Number(s.duration_seconds||0),0));let d=new Date();d.setHours(12,0,0,0);if(!(t[key(d)]>0))d.setDate(d.getDate()-1);let st=0;for(let i=0;i<1000;i++){if(t[key(d)]>0){st++;d.setDate(d.getDate()-1)}else break}$("#streak").textContent=`${st} дней`}
+const lvl=m=>m<=0?0:m<30?1:m<60?2:m<120?3:4;
+function renderHeat(){const el=$("#heatmap");el.innerHTML="";const t=totals(),today=new Date();today.setHours(12,0,0,0);const start=new Date(today);start.setDate(start.getDate()-364-((start.getDay()+6)%7));const end=new Date(today);end.setDate(end.getDate()+((7-((end.getDay()+6)%7)-1)%7));for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){const k=key(d),m=Math.round((t[k]||0)/60),q=document.createElement("div");q.className=`sq l${lvl(m)}`;q.title=`${k} — ${m} мин`;if(d>today)q.style.opacity=".35";el.appendChild(q)}}
+function renderStats(){const t={};subjects.forEach(s=>t[s.name]=0);sessions.forEach(s=>t[s.subject_name]=(t[s.subject_name]||0)+Number(s.duration_seconds||0));const max=Math.max(1,...Object.values(t)),el=$("#subjectStats");el.innerHTML="";Object.entries(t).sort((a,b)=>b[1]-a[1]).forEach(([n,s])=>{const r=document.createElement("div");r.className="stat";const a=document.createElement("div");a.textContent=n;const b=document.createElement("div");b.className="bar";const f=document.createElement("div");f.style.width=`${s/max*100}%`;b.appendChild(f);const c=document.createElement("div");c.textContent=duration(s);r.append(a,b,c);el.appendChild(r)})}
+function renderHistory(){const el=$("#history");el.innerHTML="";if(!sessions.length){el.innerHTML='<div class="small">Пока нет сохранённых занятий.</div>';return}sessions.slice(0,30).forEach(s=>{const r=document.createElement("div");r.className="hist";const left=document.createElement("div");const title=document.createElement("strong");title.textContent=s.subject_name;const dt=document.createElement("div");dt.className="small";dt.textContent=new Date(s.ended_at||s.created_at).toLocaleString("ru-RU");left.append(title,dt);const dur=document.createElement("div");dur.textContent=duration(s.duration_seconds);const del=document.createElement("button");del.className="btn ghost";del.textContent="Удалить";del.onclick=async()=>{const {error}=await supabase.from("study_sessions").delete().eq("id",s.id);if(error)return say(error.message);sessions=sessions.filter(x=>x.id!==s.id);render()};r.append(left,dur,del);el.appendChild(r)})}
+function render(){renderSubjects();renderTimer();renderCards();renderHeat();renderStats();renderHistory()}
+
+$("#addSubject").onclick=async()=>{const name=$("#newSubject").value.trim();if(!name)return;const {data,error}=await supabase.from("subjects").insert({user_id:user.id,name,sort_order:subjects.length*10+10}).select().single();if(error)return say(error.message);subjects.push(data);$("#newSubject").value="";renderSubjects();renderStats()};
+$("#startBtn").onclick=async()=>{if(!active){const s=subjects.find(x=>x.id===$("#subject").value);if(!s)return say("Добавь или выбери предмет.");const {data,error}=await supabase.from("active_timers").upsert({user_id:user.id,subject_id:s.id,subject_name:s.name,started_at:new Date().toISOString(),elapsed_seconds:0,running:true}).select().single();if(error)return say(error.message);active=data}else{const {data,error}=await supabase.from("active_timers").update({running:true,started_at:new Date().toISOString()}).eq("user_id",user.id).select().single();if(error)return say(error.message);active=data}renderTimer()};
+$("#pauseBtn").onclick=async()=>{if(!active?.running)return;const {data,error}=await supabase.from("active_timers").update({elapsed_seconds:activeSeconds(),running:false,started_at:null}).eq("user_id",user.id).select().single();if(error)return say(error.message);active=data;renderTimer()};
+$("#discardBtn").onclick=async()=>{if(!active)return;const {error}=await supabase.from("active_timers").delete().eq("user_id",user.id);if(error)return say(error.message);active=null;say("Таймер сброшен.");renderTimer()};
+$("#finishBtn").onclick=async()=>{if(!active)return;const sec=activeSeconds();if(sec<1)return;const end=new Date(),start=new Date(end-sec*1000);const {data,error}=await supabase.from("study_sessions").insert({user_id:user.id,subject_id:active.subject_id,subject_name:active.subject_name,started_at:start.toISOString(),ended_at:end.toISOString(),duration_seconds:sec,source:"timer"}).select().single();if(error)return say(error.message);const del=await supabase.from("active_timers").delete().eq("user_id",user.id);if(del.error)return say(del.error.message);sessions.unshift(data);active=null;say(`Сохранено: ${data.subject_name} — ${duration(sec)}.`);render()};
+$("#manualForm").onsubmit=async e=>{e.preventDefault();const s=subjects.find(x=>x.id===$("#manualSubject").value),date=$("#manualDate").value,mins=Math.floor(Number($("#manualMinutes").value));if(!s||!date||mins<1||mins>1440)return say("Укажи предмет, дату и количество минут.");const end=new Date(`${date}T12:00:00`),start=new Date(end-mins*60000);const {data,error}=await supabase.from("study_sessions").insert({user_id:user.id,subject_id:s.id,subject_name:s.name,started_at:start.toISOString(),ended_at:end.toISOString(),duration_seconds:mins*60,source:"manual"}).select().single();if(error)return say(error.message);sessions.unshift(data);$("#manualMinutes").value="";say(`Добавлено: ${s.name} — ${mins} мин.`);render()};
+function startTicker(){if(tick)clearInterval(tick);tick=setInterval(()=>{if(active?.running)$("#timer").textContent=clock(activeSeconds())},1000)}
+$("#manualDate").value=key();
+const {data:{session}}=await supabase.auth.getSession();if(session){user=session.user;try{await boot()}catch(e){showAuth(e.message||"Не удалось загрузить данные.")}}else showAuth();
+supabase.auth.onAuthStateChange(async(ev,s)=>{if(ev==="SIGNED_OUT"){user=null;showAuth()}else if(s&&!user){user=s.user;try{await boot()}catch(e){$("#authMsg").textContent=e.message||"Ошибка загрузки."}}});
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+</script>
+</body>
+</html>
